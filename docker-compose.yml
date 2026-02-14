@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: medical_lab_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: medical_lab_reports
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    image: python:3.11-slim
+    container_name: medical_lab_backend
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+
+  frontend:
+    image: python:3.11-slim
+    container_name: medical_lab_frontend
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && streamlit run frontend/app.py --server.port=8501 --server.address=0.0.0.0"
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

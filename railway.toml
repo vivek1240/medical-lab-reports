@@ -2,17 +2,9 @@
 builder = "nixpacks"
 
 [deploy]
-# Railway sets $PORT automatically.
-# Override startCommand per-service in the Railway dashboard:
-#
-#   Backend service:
-#     alembic upgrade head && uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-#
-#   Frontend service:
-#     streamlit run frontend/app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true
-#
-# Default start command below is for the backend.
-startCommand = "alembic upgrade head && uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/docs"
+# Start commands are set per-service via NIXPACKS_START_CMD env var.
+# Backend:  alembic upgrade head && uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+# Frontend: streamlit run frontend/app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true
+healthcheckPath = "/"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

@@ -323,10 +323,40 @@ button[data-baseweb="tab"][aria-selected="true"] {
 /* ---------- Text inputs ---------- */
 [data-testid="stTextInput"] input,
 [data-testid="stDateInput"] input,
-[data-testid="stSelectbox"] div[data-baseweb="select"] {
+[data-testid="stSelectbox"] div[data-baseweb="select"],
+[data-baseweb="input"] input,
+[data-baseweb="base-input"] input,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
     color: %(text)s !important;
     background-color: %(bg_card)s !important;
     border-color: %(border)s !important;
+}
+/* Placeholder text */
+input::placeholder,
+textarea::placeholder {
+    color: %(text_muted)s !important;
+    opacity: 0.7 !important;
+}
+/* Form labels */
+[data-testid="stTextInput"] label,
+[data-testid="stDateInput"] label,
+[data-testid="stSelectbox"] label,
+[data-testid="stFileUploader"] label,
+[data-testid="stSlider"] label,
+[data-testid="stMultiSelect"] label {
+    color: %(text)s !important;
+}
+/* Selectbox / multiselect dropdown text */
+[data-baseweb="select"] span,
+[data-baseweb="select"] div {
+    color: %(text)s !important;
+}
+/* Password visibility toggle */
+[data-testid="stTextInput"] button svg {
+    fill: %(text_muted)s !important;
 }
 </style>
 """

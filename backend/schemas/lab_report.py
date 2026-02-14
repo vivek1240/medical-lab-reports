@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 class TestResult(BaseModel):
     """Individual lab test result with value, unit, and reference range."""
-    test_name: str = Field(description="Name of the lab test")
+    test_name: str | None = Field(default=None, description="Name of the lab test")
     value: str | None = Field(default=None, description="Test result value")
     unit: str | None = Field(default=None, description="Unit of measurement")
     reference_range: str | None = Field(default=None, description="Normal/reference range for the test")
@@ -13,7 +13,7 @@ class TestResult(BaseModel):
 
 class PatientInfo(BaseModel):
     """Patient demographic information."""
-    name: str = Field(description="Patient full name")
+    name: str | None = Field(default=None, description="Patient full name")
     date_of_birth: str | None = Field(default=None, description="Patient date of birth")
     gender: str | None = Field(default=None, description="Patient gender")
     patient_id: str | None = Field(default=None, description="Patient ID or MRN")
@@ -27,14 +27,14 @@ class LabReport(BaseModel):
     collection_date: str | None = None
     sample_type: str | None = None
     physician_name: str | None = None
-    test_results: list[TestResult]
+    test_results: list[TestResult] = Field(default_factory=list)
 
 
 class ReportListItem(BaseModel):
     doc_id: str
     lab_name: str | None
     report_date: str | None
-    patient_name: str
+    patient_name: str | None
     created_at: str
 
 

@@ -90,8 +90,8 @@ async def unhandled_exception_handler(_: Request, exc: Exception):
         content={
             "error": {
                 "code": "INTERNAL_SERVER_ERROR",
-                "message": "An unexpected error occurred",
-                "details": {},
+                "message": str(exc) or "An unexpected error occurred",
+                "details": {"type": type(exc).__name__},
             }
         },
     )

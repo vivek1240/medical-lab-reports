@@ -40,7 +40,7 @@ async def upload_report(
 
     report = LabReportRecord(
         user_id=current_user.id,
-        patient_name=parsed_report.patient_info.name,
+        patient_name=parsed_report.patient_info.name or "Unknown",
         patient_id=parsed_report.patient_info.patient_id,
         date_of_birth=_safe_date(parsed_report.patient_info.date_of_birth),
         gender=parsed_report.patient_info.gender,
@@ -58,6 +58,8 @@ async def upload_report(
     mapped_count = 0
     unmapped_tests: list[str] = []
     for item in parsed_report.test_results:
+        if not item.test_name:
+            continue  # skip entries the LLM returned without a test name
         biomarker_id = classify_test_name(db, item.test_name)
         if biomarker_id is not None:
             mapped_count += 1

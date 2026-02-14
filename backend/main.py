@@ -43,6 +43,11 @@ def startup_event():
     seed_biomarkers()
 
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "medical-lab-reports-api"}
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

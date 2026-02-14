@@ -20,7 +20,7 @@ def overview(db: Session = Depends(get_db), current_user: User = Depends(get_cur
         .join(LabReportRecord, TestResultRecord.doc_id == LabReportRecord.doc_id)
         .outerjoin(BiomarkerReference, TestResultRecord.biomarker_id == BiomarkerReference.id)
         .filter(LabReportRecord.user_id == current_user.id)
-        .order_by(LabReportRecord.report_date.asc().nullsfirst(), LabReportRecord.created_at.asc())
+        .order_by(LabReportRecord.report_date.is_(None).desc(), LabReportRecord.report_date.asc(), LabReportRecord.created_at.asc())
         .all()
     )
 

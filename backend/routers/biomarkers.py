@@ -67,7 +67,7 @@ def history(biomarker_id: int, db: Session = Depends(get_db), current_user: User
             TestResultRecord.biomarker_id == biomarker_id,
             LabReportRecord.user_id == current_user.id,
         )
-        .order_by(LabReportRecord.report_date.asc().nullsfirst(), LabReportRecord.created_at.asc())
+        .order_by(LabReportRecord.report_date.is_(None).desc(), LabReportRecord.report_date.asc(), LabReportRecord.created_at.asc())
         .all()
     )
 

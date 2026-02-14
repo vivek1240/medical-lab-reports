@@ -91,7 +91,7 @@ def list_reports(db: Session = Depends(get_db), current_user: User = Depends(get
     rows = (
         db.query(LabReportRecord)
         .filter(LabReportRecord.user_id == current_user.id)
-        .order_by(LabReportRecord.report_date.desc().nullslast(), LabReportRecord.created_at.desc())
+        .order_by(LabReportRecord.report_date.is_(None), LabReportRecord.report_date.desc(), LabReportRecord.created_at.desc())
         .all()
     )
     return [

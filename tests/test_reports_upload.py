@@ -1,18 +1,12 @@
-from backend.models.user import User
 from backend.schemas.lab_report import LabReport, PatientInfo, TestResult
 
 
-def _register_and_token(client) -> str:
-    response = client.post(
-        "/api/auth/register",
-        json={"email": "uploader@example.com", "password": "secret123", "full_name": "Uploader"},
-    )
-    assert response.status_code == 200
-    return response.json()["token"]
+def _user_id() -> str:
+    return "11111111-2222-3333-4444-555555555555"
 
 
 def test_upload_report_with_mocked_parser(client, db_session, monkeypatch):
-    token = _register_and_token(client)
+    user_id = _user_id()
 
     def fake_parse_pdf_bytes(file_bytes: bytes, file_name: str, llama_api_key=None) -> str:
         assert file_name.endswith(".pdf")
@@ -41,13 +35,10 @@ def test_upload_report_with_mocked_parser(client, db_session, monkeypatch):
     monkeypatch.setattr("backend.routers.reports.extract_lab_data", fake_extract_lab_data)
 
     files = {"file": ("sample.pdf", b"%PDF-1.4 mock", "application/pdf")}
-    response = client.post("/api/reports/upload", files=files, headers={"Authorization": f"Bearer {token}"})
+    response = client.post("/api/reports/upload", files=files, headers={"X-MHC-User-Id": user_id})
     assert response.status_code == 200
     payload = response.json()
-    assert payload["tests"] == 1
-    assert payload["mapped_tests"] >= 0
-    assert "doc_id" in payload
-
-    # Ensure report row persisted for the current user.
-    user = db_session.query(User).filter(User.email == "uploader@example.com").first()
-    assert user is not None
+    assert payload["statusCode"] == 200
+    assert payload["data"]["total_tests"] == 1
+    assert payload["data"]["mapped_tests"] >= 0
+    assert "doc_id" in payload["data"]

@@ -4,25 +4,9 @@ def test_health(client):
     assert response.json()["status"] == "ok"
 
 
-def test_register_and_login(client):
-    register_response = client.post(
-        "/api/auth/register",
-        json={"email": "test@example.com", "password": "secret123", "full_name": "Test User"},
-    )
-    assert register_response.status_code == 200
-    register_payload = register_response.json()
-    assert "token" in register_payload
-    assert register_payload["user"]["email"] == "test@example.com"
-
-    login_response = client.post("/api/auth/login", json={"email": "test@example.com", "password": "secret123"})
-    assert login_response.status_code == 200
-    login_payload = login_response.json()
-    assert "token" in login_payload
-
-
-def test_error_envelope_on_invalid_login(client):
-    response = client.post("/api/auth/login", json={"email": "missing@example.com", "password": "bad"})
+def test_missing_user_id_header_returns_401(client):
+    response = client.get("/api/reports")
     assert response.status_code == 401
     payload = response.json()
-    assert "error" in payload
-    assert payload["error"]["code"] == "HTTP_ERROR"
+    assert payload["statusCode"] == 401
+    assert payload["error"] == "Unauthorized"

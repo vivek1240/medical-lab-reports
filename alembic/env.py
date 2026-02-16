@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from backend.config import settings
 from backend.database import Base
-from backend.models import biomarker, lab_report, user  # noqa: F401
+from backend.models import biomarker, lab_report  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

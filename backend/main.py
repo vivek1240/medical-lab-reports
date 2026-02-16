@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 from alembic.config import Config
@@ -6,15 +7,26 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from backend.config import settings
 from backend.database import engine
-from backend.models import biomarker, lab_report, user  # noqa: F401
-from backend.routers import auth, biomarkers, reports, trends
+from backend.models import biomarker, lab_report  # noqa: F401
+from backend.routers import biomarkers, reports, trends
 from backend.seed.biomarker_seed import seed_biomarkers
 
 app = FastAPI(title="Medical Lab Reports API", version="0.1.0")
 logger = logging.getLogger(__name__)
+
+allowed_origins = [origin.strip() for origin in settings.allowed_origins.split(",") if origin.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins or ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _assert_database_at_head() -> None:
@@ -45,25 +57,42 @@ def startup_event():
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "medical-lab-reports-api"}
+    return {"statusCode": 200, "message": "Success", "data": {"status": "ok", "service": "custom-labs"}}
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "custom-labs",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def _error_name(status_code: int) -> str:
+    if status_code == 400:
+        return "BadRequest"
+    if status_code == 401:
+        return "Unauthorized"
+    if status_code == 403:
+        return "Forbidden"
+    if status_code == 404:
+        return "NotFound"
+    if status_code == 422:
+        return "ValidationError"
+    if status_code >= 500:
+        return "InternalServerError"
+    return "HTTPError"
 
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(_: Request, exc: HTTPException):
-    details = exc.detail if isinstance(exc.detail, dict) else {"reason": str(exc.detail)}
     return JSONResponse(
         status_code=exc.status_code,
         content={
-            "error": {
-                "code": "HTTP_ERROR",
-                "message": "Request failed",
-                "details": details,
-            }
+            "statusCode": exc.status_code,
+            "message": str(exc.detail) if exc.detail else "Request failed",
+            "error": _error_name(exc.status_code),
         },
     )
 
@@ -73,11 +102,10 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=422,
         content={
-            "error": {
-                "code": "VALIDATION_ERROR",
-                "message": "Invalid request payload",
-                "details": {"errors": exc.errors()},
-            }
+            "statusCode": 422,
+            "message": "Invalid request payload",
+            "error": "ValidationError",
+            "details": {"errors": exc.errors()},
         },
     )
 
@@ -88,16 +116,13 @@ async def unhandled_exception_handler(_: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
-            "error": {
-                "code": "INTERNAL_SERVER_ERROR",
-                "message": str(exc) or "An unexpected error occurred",
-                "details": {"type": type(exc).__name__},
-            }
+            "statusCode": 500,
+            "message": str(exc) or "An unexpected error occurred",
+            "error": "InternalServerError",
         },
     )
 
 
-app.include_router(auth.router)
 app.include_router(reports.router)
 app.include_router(biomarkers.router)
 app.include_router(trends.router)

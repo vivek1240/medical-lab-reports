@@ -8,13 +8,14 @@ class Settings(BaseSettings):
     app_env: str = "dev"
     app_host: str = "0.0.0.0"
     app_port: int = 8000
-    session_ttl_hours: int = 168
 
     openai_api_key: str | None = None
     llama_cloud_api_key: str | None = None
     api_base_url: str = "http://localhost:8000"
     classifier_fuzzy_threshold: int = 85
     classifier_enable_llm_fallback: bool = True
+    allowed_origins: str = "http://localhost:3001"
+    max_upload_size_mb: int = 20
 
 
 settings = Settings()

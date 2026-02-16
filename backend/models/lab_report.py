@@ -11,7 +11,7 @@ class LabReportRecord(Base):
     __tablename__ = "lab_reports"
 
     doc_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[str] = mapped_column(String(36), index=True)
     patient_name: Mapped[str] = mapped_column(String(255), nullable=False)
     patient_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
@@ -25,7 +25,6 @@ class LabReportRecord(Base):
     raw_parsed_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", back_populates="lab_reports")
     test_results = relationship("TestResultRecord", back_populates="report", cascade="all, delete-orphan")
 
 

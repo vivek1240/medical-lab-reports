@@ -1,21 +1,3 @@
-CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(36) PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS user_sessions (
-    id VARCHAR(64) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_user_sessions_user_id (user_id),
-    INDEX idx_user_sessions_expires_at (expires_at)
-);
-
 CREATE TABLE IF NOT EXISTS biomarker_reference (
     id INT AUTO_INCREMENT PRIMARY KEY,
     standard_name VARCHAR(255) NOT NULL UNIQUE,
@@ -43,7 +25,6 @@ CREATE TABLE IF NOT EXISTS lab_reports (
     original_filename VARCHAR(255),
     raw_parsed_text TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_lab_reports_user_id (user_id),
     INDEX idx_lab_reports_report_date (report_date)
 );
